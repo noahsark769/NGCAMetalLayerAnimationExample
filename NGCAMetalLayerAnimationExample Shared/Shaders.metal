@@ -43,10 +43,6 @@ vertex ColorInOut vertex_shader(device Vertex *vertices [[buffer(0)]],
 
 fragment float4 fragment_shader(ColorInOut in [[stage_in]])
 {
-    constexpr sampler colorSampler(mip_filter::linear,
-                                   mag_filter::linear,
-                                   min_filter::linear);
-
     // Blue
     return float4(0, 0, 1, 1);
 }

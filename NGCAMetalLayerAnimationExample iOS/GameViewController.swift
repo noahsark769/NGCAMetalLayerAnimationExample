@@ -13,6 +13,18 @@ extension matrix_float4x4 {
     static func identity() -> matrix_float4x4 {
         return matrix_float4x4(diagonal: SIMD4<Float>(1, 1, 1, 1))
     }
+
+    static func scale(x: Float, y: Float) -> matrix_float4x4 {
+        return matrix_float4x4.init(columns:(vector_float4(x, 0, 0, 0),
+                                             vector_float4(0, y, 0, 0),
+                                             vector_float4(0, 0, 1, 0),
+                                             vector_float4(0, 0, 0, 1)))
+    }
+
+    static func scale(xy: Float) -> matrix_float4x4 {
+        return self.scale(x: xy, y: xy)
+    }
+
 //    static func ortographic_projection(left: Float, right: Float, top: Float, bottom: Float, near: Float, far: Float) -> matrix_float4x4 {
 //        let xs = 2.0 / (right - left)
 //        let ys = 2.0 / (top - bottom)
@@ -40,6 +52,12 @@ class CustomCAMetalLayer: CAMetalLayer {
     private var vertices: [Vertex]!
     private var vertexBuffer: MTLBuffer!
     private var uniformsBuffer: MTLBuffer!
+
+    var ngScale: CGFloat = 1 {
+        didSet {
+            self.setNeedsDisplay()
+        }
+    }
 
     override init() {
         super.init()
@@ -123,6 +141,7 @@ class CustomCAMetalLayer: CAMetalLayer {
     }
 
     private func update() {
+        self.uniforms.modelViewMatrix = matrix_float4x4.scale(xy: Float(self.ngScale))
         let uniforms = [
             self.uniforms
         ]
@@ -171,5 +190,25 @@ class GameViewController: UIViewController {
         metalView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor).isActive = true
         metalView.topAnchor.constraint(equalTo: self.view.topAnchor).isActive = true
         metalView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor).isActive = true
+
+        let button = UIButton()
+        button.setTitle("Expand!", for: .normal)
+        button.setTitleColor(.red, for: .normal)
+        button.addTarget(self, action: #selector(didTapButton), for: .touchUpInside)
+        self.view.addSubview(button)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -20).isActive = true
+        button.bottomAnchor.constraint(equalTo: self.view.bottomAnchor, constant: -20).isActive = true
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+    }
+
+    @objc private func didTapButton() {
+        guard let layer = self.metalView.layer as? CustomCAMetalLayer else {
+            return
+        }
+        layer.ngScale = 2
     }
 }
