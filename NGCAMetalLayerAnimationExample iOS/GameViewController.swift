@@ -53,20 +53,37 @@ class CustomCAMetalLayer: CAMetalLayer {
     private var vertexBuffer: MTLBuffer!
     private var uniformsBuffer: MTLBuffer!
 
-    var ngScale: CGFloat = 1 {
-        didSet {
-            self.setNeedsDisplay()
+    @NSManaged var ngScale: CGFloat // ?? WTF NSManaged, https://stackoverflow.com/questions/24150243/are-needsdisplayforkey-actionforkey-overrides-working-correctly
+
+    override class func needsDisplay(forKey key: String) -> Bool {
+        if key == "ngScale" {
+            return true
         }
+        return super.needsDisplay(forKey: key)
+    }
+
+    override func action(forKey key: String) -> CAAction? {
+        if key == "ngScale" {
+            let animation = CABasicAnimation(keyPath: key)
+            animation.timingFunction = CAMediaTimingFunction(name: .linear)
+            animation.fromValue = (self.presentation() as? CustomCAMetalLayer)?.ngScale
+            return animation
+        }
+        return super.action(forKey: key)
     }
 
     override init() {
         super.init()
+        self.sharedInit(device: MTLCreateSystemDefaultDevice()!)
+    }
 
+    override init(layer: Any) {
+        super.init(layer: layer)
+        self.sharedInit(device: (layer as! CAMetalLayer).device!)
+    }
+
+    private func sharedInit(device: MTLDevice) {
         self.needsDisplayOnBoundsChange = true
-
-        guard let device = MTLCreateSystemDefaultDevice() else {
-            fatalError("This sytem doesn't have a GPU mate")
-        }
         self.device = device
         self.pixelFormat = .bgra8Unorm
 
@@ -149,6 +166,7 @@ class CustomCAMetalLayer: CAMetalLayer {
     }
 
     override func display() {
+        print("Calling display() with ngScale: \(self.ngScale)")
         self.update()
 
         guard let commandBuffer = self.commandQueue.makeCommandBuffer() else {
@@ -209,6 +227,10 @@ class GameViewController: UIViewController {
         guard let layer = self.metalView.layer as? CustomCAMetalLayer else {
             return
         }
-        layer.ngScale = 2
+        print("ButtonTap")
+        UIView.animate(withDuration: 2, animations: {
+            layer.ngScale = 2
+        })
+
     }
 }
