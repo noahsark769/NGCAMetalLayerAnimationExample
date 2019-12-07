@@ -195,9 +195,11 @@ class MetalView: UIView {
 class GameViewController: UIViewController {
     private let metalView = MetalView()
     private let button = UIButton()
+    private let keyFrameButton = UIButton()
     private var isAnimating = false {
         didSet {
             self.button.isEnabled = !self.isAnimating
+            self.keyFrameButton.isEnabled = !self.isAnimating
         }
     }
 
@@ -218,6 +220,15 @@ class GameViewController: UIViewController {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -80).isActive = true
         button.topAnchor.constraint(equalTo: self.view.topAnchor, constant: 80).isActive = true
+
+        keyFrameButton.setTitle("Keyframe!", for: .normal)
+        keyFrameButton.setTitleColor(.red, for: .normal)
+        keyFrameButton.setTitleColor(UIColor.red.withAlphaComponent(0.5), for: .disabled)
+        keyFrameButton.addTarget(self, action: #selector(didTapKeyframeButton), for: .touchUpInside)
+        self.view.addSubview(keyFrameButton)
+        keyFrameButton.translatesAutoresizingMaskIntoConstraints = false
+        keyFrameButton.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -80).isActive = true
+        keyFrameButton.topAnchor.constraint(equalTo: self.view.topAnchor, constant: 120).isActive = true
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -241,6 +252,27 @@ class GameViewController: UIViewController {
         } else {
             layer.ngScale = 1.9
         }
+        CATransaction.commit()
+        self.isAnimating = true
+    }
+
+    @objc private func didTapKeyframeButton() {
+        guard !self.isAnimating else { return }
+
+        CATransaction.begin()
+        CATransaction.setCompletionBlock {
+            self.isAnimating = false
+        }
+        let animation = CAKeyframeAnimation()
+        animation.keyPath = "ngScale"
+        animation.values = [(self.metalView.layer as! CustomCAMetalLayer).ngScale, -1, 1.9, -1.9, (self.metalView.layer as! CustomCAMetalLayer).ngScale]
+        animation.keyTimes = [0, 0.2, 0.5, 0.8, 1]
+        animation.timingFunctions = [.init(name: .easeInEaseOut), .init(name: .easeInEaseOut), .init(name: .easeInEaseOut), .init(name: .easeInEaseOut)]
+        animation.duration = 8
+
+//        animation.isAdditive = true
+        self.metalView.layer.add(animation, forKey: "expandScale")
+
         CATransaction.commit()
         self.isAnimating = true
     }
