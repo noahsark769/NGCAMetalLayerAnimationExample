@@ -24,27 +24,9 @@ extension matrix_float4x4 {
     static func scale(xy: Float) -> matrix_float4x4 {
         return self.scale(x: xy, y: xy)
     }
-
-//    static func ortographic_projection(left: Float, right: Float, top: Float, bottom: Float, near: Float, far: Float) -> matrix_float4x4 {
-//        let xs = 2.0 / (right - left)
-//        let ys = 2.0 / (top - bottom)
-//        let zs = -2.0 / (far - near)
-//        let tx = -((right + left) / (right - left))
-//        let ty = -((top + bottom) / (top - bottom))
-//        let tz = -((far + near) / (far - near))
-//
-//        return matrix_float4x4.init(
-//            rows: [
-//                vector_float4(xs,  0,  0, tx),
-//                vector_float4( 0, ys,  0, ty),
-//                vector_float4( 0,  0, zs, tz),
-//                vector_float4( 0,  0,  0,  1)
-//            ]
-//        )
-//    }
 }
 
-class CustomCAMetalLayer: CAMetalLayer {
+final class Renderer {
     private var commandQueue: MTLCommandQueue!
     private var pipelineState: MTLRenderPipelineState!
     private var uniforms = Uniforms(projectionMatrix: .identity(), modelViewMatrix: .identity())
@@ -53,40 +35,9 @@ class CustomCAMetalLayer: CAMetalLayer {
     private var vertexBuffer: MTLBuffer!
     private var uniformsBuffer: MTLBuffer!
 
-    @NSManaged var ngScale: CGFloat // ?? WTF NSManaged, https://stackoverflow.com/questions/24150243/are-needsdisplayforkey-actionforkey-overrides-working-correctly
+    var scale: Float = 0
 
-    override class func needsDisplay(forKey key: String) -> Bool {
-        if key == "ngScale" {
-            return true
-        }
-        return super.needsDisplay(forKey: key)
-    }
-
-    override func action(forKey key: String) -> CAAction? {
-        if key == "ngScale" {
-            let animation = CABasicAnimation(keyPath: key)
-            animation.timingFunction = CAMediaTimingFunction(name: .linear)
-            animation.fromValue = (self.presentation() as? CustomCAMetalLayer)?.ngScale
-            return animation
-        }
-        return super.action(forKey: key)
-    }
-
-    override init() {
-        super.init()
-        self.sharedInit(device: MTLCreateSystemDefaultDevice()!)
-    }
-
-    override init(layer: Any) {
-        super.init(layer: layer)
-        self.sharedInit(device: (layer as! CAMetalLayer).device!)
-    }
-
-    private func sharedInit(device: MTLDevice) {
-        self.needsDisplayOnBoundsChange = true
-        self.device = device
-        self.pixelFormat = .bgra8Unorm
-
+    init(device: MTLDevice) {
         guard let commandQueue = device.makeCommandQueue() else {
             fatalError("Could not create command queue, something's wrong")
         }
@@ -132,20 +83,14 @@ class CustomCAMetalLayer: CAMetalLayer {
             fatalError("Unable to allocate uniforms buffer")
         }
         self.uniformsBuffer = uniformsBuffer
-
-        self.setNeedsDisplay()
     }
 
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
-    private func blockRequestingNextDrawable() -> CAMetalDrawable {
-        var drawable: CAMetalDrawable? = nil
-        while (drawable == nil) {
-            drawable = self.nextDrawable()
-        }
-        return drawable!
+    private func update() {
+        self.uniforms.modelViewMatrix = matrix_float4x4.scale(xy: self.scale)
+        let uniforms = [
+            self.uniforms
+        ]
+        memcpy(self.uniformsBuffer.contents(), UnsafeRawPointer(uniforms), MemoryLayout<Uniforms>.size)
     }
 
     private func renderPassDescriptor(texture: MTLTexture) -> MTLRenderPassDescriptor {
@@ -157,22 +102,13 @@ class CustomCAMetalLayer: CAMetalLayer {
         return descriptor
     }
 
-    private func update() {
-        self.uniforms.modelViewMatrix = matrix_float4x4.scale(xy: Float(self.ngScale))
-        let uniforms = [
-            self.uniforms
-        ]
-        memcpy(self.uniformsBuffer.contents(), UnsafeRawPointer(uniforms), MemoryLayout<Uniforms>.size)
-    }
-
-    override func display() {
-        print("Calling display() with ngScale: \(self.ngScale)")
+    func draw(drawable: CAMetalDrawable) {
+        print("Calling display() with scale: \(self.scale)")
         self.update()
 
         guard let commandBuffer = self.commandQueue.makeCommandBuffer() else {
             fatalError("Unable to create command buffer, maybe the GPU is fubar'd")
         }
-        let drawable = self.blockRequestingNextDrawable()
         let renderPassDescriptor = self.renderPassDescriptor(texture: drawable.texture)
         guard let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor) else {
             fatalError("Unable to create command encoder, possible something is screwed up")
@@ -190,6 +126,65 @@ class CustomCAMetalLayer: CAMetalLayer {
     }
 }
 
+class CustomCAMetalLayer: CAMetalLayer {
+    private var renderer: Renderer!
+    @NSManaged var ngScale: CGFloat
+
+    override class func needsDisplay(forKey key: String) -> Bool {
+        if key == "ngScale" {
+            return true
+        }
+        return super.needsDisplay(forKey: key)
+    }
+
+    override func action(forKey key: String) -> CAAction? {
+        if key == "ngScale" {
+            let animation = CABasicAnimation(keyPath: key)
+            animation.timingFunction = CAMediaTimingFunction(name: .linear)
+            animation.fromValue = self.presentation()?.ngScale
+            return animation
+        }
+        return super.action(forKey: key)
+    }
+
+    override init() {
+        super.init()
+        self.device = MTLCreateSystemDefaultDevice()!
+        self.renderer = Renderer(device: self.device!)
+        self.ngScale = 1
+        self.setNeedsDisplay()
+    }
+
+    override init(layer: Any) {
+        super.init(layer: layer)
+        guard let layer = layer as? CustomCAMetalLayer else {
+            return
+        }
+        self.renderer = layer.renderer
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    private func blockRequestingNextDrawable() -> CAMetalDrawable {
+        var drawable: CAMetalDrawable? = nil
+        while (drawable == nil) {
+            drawable = self.nextDrawable()
+        }
+        return drawable!
+    }
+
+    override func display() {
+        guard let scale = self.presentation()?.ngScale else {
+            return
+        }
+        self.renderer.scale = Float(scale)
+        let drawable = self.blockRequestingNextDrawable()
+        self.renderer.draw(drawable: drawable)
+    }
+}
+
 class MetalView: UIView {
     override class var layerClass: AnyClass {
         return CustomCAMetalLayer.self
@@ -199,6 +194,12 @@ class MetalView: UIView {
 // Our iOS specific view controller
 class GameViewController: UIViewController {
     private let metalView = MetalView()
+    private let button = UIButton()
+    private var isAnimating = false {
+        didSet {
+            self.button.isEnabled = !self.isAnimating
+        }
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -209,14 +210,14 @@ class GameViewController: UIViewController {
         metalView.topAnchor.constraint(equalTo: self.view.topAnchor).isActive = true
         metalView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor).isActive = true
 
-        let button = UIButton()
         button.setTitle("Expand!", for: .normal)
         button.setTitleColor(.red, for: .normal)
+        button.setTitleColor(UIColor.red.withAlphaComponent(0.5), for: .disabled)
         button.addTarget(self, action: #selector(didTapButton), for: .touchUpInside)
         self.view.addSubview(button)
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -20).isActive = true
-        button.bottomAnchor.constraint(equalTo: self.view.bottomAnchor, constant: -20).isActive = true
+        button.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -80).isActive = true
+        button.topAnchor.constraint(equalTo: self.view.topAnchor, constant: 80).isActive = true
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -224,13 +225,23 @@ class GameViewController: UIViewController {
     }
 
     @objc private func didTapButton() {
+        guard !self.isAnimating else { return }
         guard let layer = self.metalView.layer as? CustomCAMetalLayer else {
             return
         }
-        print("ButtonTap")
-        UIView.animate(withDuration: 2, animations: {
-            layer.ngScale = 2
-        })
+        CATransaction.begin()
+        CATransaction.setAnimationDuration(2)
+        CATransaction.setAnimationTimingFunction(.init(name: .easeInEaseOut))
+        CATransaction.setCompletionBlock {
+            self.isAnimating = false
+        }
 
+        if layer.ngScale > 1 {
+            layer.ngScale = 1
+        } else {
+            layer.ngScale = 1.9
+        }
+        CATransaction.commit()
+        self.isAnimating = true
     }
 }
