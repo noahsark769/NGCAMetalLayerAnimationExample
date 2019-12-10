@@ -11,13 +11,6 @@
 		D089F17623870EBF00775A6C /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D089F17523870EBF00775A6C /* GameViewController.swift */; };
 		D089F17923870EBF00775A6C /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D089F17723870EBF00775A6C /* Main.storyboard */; };
 		D089F17C23870EBF00775A6C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D089F17A23870EBF00775A6C /* LaunchScreen.storyboard */; };
-		D089F18523870EBF00775A6C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D089F18423870EBF00775A6C /* AppDelegate.swift */; };
-		D089F18723870EBF00775A6C /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D089F18623870EBF00775A6C /* GameViewController.swift */; };
-		D089F18A23870EBF00775A6C /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D089F18823870EBF00775A6C /* Main.storyboard */; };
-		D089F18D23870EBF00775A6C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D089F18B23870EBF00775A6C /* LaunchScreen.storyboard */; };
-		D089F19623870EBF00775A6C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D089F19523870EBF00775A6C /* AppDelegate.swift */; };
-		D089F19823870EBF00775A6C /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D089F19723870EBF00775A6C /* GameViewController.swift */; };
-		D089F19B23870EBF00775A6C /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D089F19923870EBF00775A6C /* Main.storyboard */; };
 		D089F19D23870EBF00775A6C /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = D089F16823870EBC00775A6C /* Shaders.metal */; };
 		D089F19E23870EBF00775A6C /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = D089F16823870EBC00775A6C /* Shaders.metal */; };
 		D089F19F23870EBF00775A6C /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = D089F16823870EBC00775A6C /* Shaders.metal */; };
@@ -44,16 +37,7 @@
 		D089F17B23870EBF00775A6C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		D089F17D23870EBF00775A6C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D089F18223870EBF00775A6C /* NGCAMetalLayerAnimationExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NGCAMetalLayerAnimationExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		D089F18423870EBF00775A6C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		D089F18623870EBF00775A6C /* GameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
-		D089F18923870EBF00775A6C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		D089F18C23870EBF00775A6C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		D089F18E23870EBF00775A6C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D089F19323870EBF00775A6C /* NGCAMetalLayerAnimationExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NGCAMetalLayerAnimationExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		D089F19523870EBF00775A6C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		D089F19723870EBF00775A6C /* GameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
-		D089F19A23870EBF00775A6C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		D089F19C23870EBF00775A6C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -86,8 +70,6 @@
 			children = (
 				D089F16723870EBC00775A6C /* NGCAMetalLayerAnimationExample Shared */,
 				D089F17223870EBF00775A6C /* NGCAMetalLayerAnimationExample iOS */,
-				D089F18323870EBF00775A6C /* NGCAMetalLayerAnimationExample tvOS */,
-				D089F19423870EBF00775A6C /* NGCAMetalLayerAnimationExample macOS */,
 				D089F17123870EBF00775A6C /* Products */,
 			);
 			sourceTree = "<group>";
@@ -123,29 +105,6 @@
 				D089F17D23870EBF00775A6C /* Info.plist */,
 			);
 			path = "NGCAMetalLayerAnimationExample iOS";
-			sourceTree = "<group>";
-		};
-		D089F18323870EBF00775A6C /* NGCAMetalLayerAnimationExample tvOS */ = {
-			isa = PBXGroup;
-			children = (
-				D089F18423870EBF00775A6C /* AppDelegate.swift */,
-				D089F18623870EBF00775A6C /* GameViewController.swift */,
-				D089F18823870EBF00775A6C /* Main.storyboard */,
-				D089F18B23870EBF00775A6C /* LaunchScreen.storyboard */,
-				D089F18E23870EBF00775A6C /* Info.plist */,
-			);
-			path = "NGCAMetalLayerAnimationExample tvOS";
-			sourceTree = "<group>";
-		};
-		D089F19423870EBF00775A6C /* NGCAMetalLayerAnimationExample macOS */ = {
-			isa = PBXGroup;
-			children = (
-				D089F19523870EBF00775A6C /* AppDelegate.swift */,
-				D089F19723870EBF00775A6C /* GameViewController.swift */,
-				D089F19923870EBF00775A6C /* Main.storyboard */,
-				D089F19C23870EBF00775A6C /* Info.plist */,
-			);
-			path = "NGCAMetalLayerAnimationExample macOS";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -260,9 +219,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D089F1A423870EBF00775A6C /* ShaderTypes.h in Resources */,
-				D089F18A23870EBF00775A6C /* Main.storyboard in Resources */,
 				D089F1A723870EBF00775A6C /* Assets.xcassets in Resources */,
-				D089F18D23870EBF00775A6C /* LaunchScreen.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -270,7 +227,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D089F19B23870EBF00775A6C /* Main.storyboard in Resources */,
 				D089F1A823870EBF00775A6C /* Assets.xcassets in Resources */,
 				D089F1A523870EBF00775A6C /* ShaderTypes.h in Resources */,
 			);
@@ -296,8 +252,6 @@
 			files = (
 				D089F1A123870EBF00775A6C /* Renderer.swift in Sources */,
 				D089F19E23870EBF00775A6C /* Shaders.metal in Sources */,
-				D089F18723870EBF00775A6C /* GameViewController.swift in Sources */,
-				D089F18523870EBF00775A6C /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -307,8 +261,6 @@
 			files = (
 				D089F1A223870EBF00775A6C /* Renderer.swift in Sources */,
 				D089F19F23870EBF00775A6C /* Shaders.metal in Sources */,
-				D089F19823870EBF00775A6C /* GameViewController.swift in Sources */,
-				D089F19623870EBF00775A6C /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -329,30 +281,6 @@
 				D089F17B23870EBF00775A6C /* Base */,
 			);
 			name = LaunchScreen.storyboard;
-			sourceTree = "<group>";
-		};
-		D089F18823870EBF00775A6C /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				D089F18923870EBF00775A6C /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
-		D089F18B23870EBF00775A6C /* LaunchScreen.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				D089F18C23870EBF00775A6C /* Base */,
-			);
-			name = LaunchScreen.storyboard;
-			sourceTree = "<group>";
-		};
-		D089F19923870EBF00775A6C /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				D089F19A23870EBF00775A6C /* Base */,
-			);
-			name = Main.storyboard;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */

@@ -240,7 +240,7 @@ class GameViewController: UIViewController {
             return
         }
         CATransaction.begin()
-        CATransaction.setAnimationDuration(0.25)
+        CATransaction.setAnimationDuration(2)
         CATransaction.setAnimationTimingFunction(.init(name: .easeInEaseOut))
         CATransaction.setCompletionBlock {
             self.isAnimating = false
