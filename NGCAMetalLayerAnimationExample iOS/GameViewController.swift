@@ -35,7 +35,7 @@ final class Renderer {
     private var vertexBuffer: MTLBuffer!
     private var uniformsBuffer: MTLBuffer!
 
-    var scale: Float = 0
+    var triangleScale: Float = 0
 
     init(device: MTLDevice) {
         guard let commandQueue = device.makeCommandQueue() else {
@@ -86,7 +86,7 @@ final class Renderer {
     }
 
     private func update() {
-        self.uniforms.modelViewMatrix = matrix_float4x4.scale(xy: self.scale)
+        self.uniforms.modelViewMatrix = matrix_float4x4.scale(xy: self.triangleScale)
         let uniforms = [
             self.uniforms
         ]
@@ -103,7 +103,6 @@ final class Renderer {
     }
 
     func draw(drawable: CAMetalDrawable) {
-        print("Calling display() with scale: \(self.scale)")
         self.update()
 
         guard let commandBuffer = self.commandQueue.makeCommandBuffer() else {
@@ -128,20 +127,19 @@ final class Renderer {
 
 class CustomCAMetalLayer: CAMetalLayer {
     private var renderer: Renderer!
-    @NSManaged var ngScale: CGFloat
+    @NSManaged var triangleScale: CGFloat
 
     override class func needsDisplay(forKey key: String) -> Bool {
-        if key == "ngScale" {
+        if key == "triangleScale" {
             return true
         }
         return super.needsDisplay(forKey: key)
     }
 
     override func action(forKey key: String) -> CAAction? {
-        if key == "ngScale" {
+        if key == "triangleScale" {
             let animation = CABasicAnimation(keyPath: key)
-            animation.timingFunction = CAMediaTimingFunction(name: .linear)
-            animation.fromValue = self.presentation()?.ngScale
+            animation.fromValue = self.presentation()?.triangleScale
             return animation
         }
         return super.action(forKey: key)
@@ -149,9 +147,9 @@ class CustomCAMetalLayer: CAMetalLayer {
 
     override init() {
         super.init()
+        self.triangleScale = 1
         self.device = MTLCreateSystemDefaultDevice()!
         self.renderer = Renderer(device: self.device!)
-        self.ngScale = 1
         self.setNeedsDisplay()
     }
 
@@ -176,10 +174,10 @@ class CustomCAMetalLayer: CAMetalLayer {
     }
 
     override func display() {
-        guard let scale = self.presentation()?.ngScale else {
+        guard let effectiveScale = self.presentation()?.triangleScale else {
             return
         }
-        self.renderer.scale = Float(scale)
+        self.renderer.triangleScale = Float(effectiveScale)
         let drawable = self.blockRequestingNextDrawable()
         self.renderer.draw(drawable: drawable)
     }
@@ -206,11 +204,12 @@ class GameViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view.addSubview(metalView)
+        self.view.backgroundColor = .white
         metalView.translatesAutoresizingMaskIntoConstraints = false
-        metalView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor).isActive = true
-        metalView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor).isActive = true
-        metalView.topAnchor.constraint(equalTo: self.view.topAnchor).isActive = true
-        metalView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor).isActive = true
+        metalView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 40).isActive = true
+        metalView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -40).isActive = true
+        metalView.topAnchor.constraint(equalTo: self.view.topAnchor, constant: 40).isActive = true
+        metalView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor, constant: -40).isActive = true
 
         button.setTitle("Expand!", for: .normal)
         button.setTitleColor(.red, for: .normal)
@@ -241,16 +240,16 @@ class GameViewController: UIViewController {
             return
         }
         CATransaction.begin()
-        CATransaction.setAnimationDuration(2)
+        CATransaction.setAnimationDuration(0.25)
         CATransaction.setAnimationTimingFunction(.init(name: .easeInEaseOut))
         CATransaction.setCompletionBlock {
             self.isAnimating = false
         }
 
-        if layer.ngScale > 1 {
-            layer.ngScale = 1
+        if layer.triangleScale > 1 {
+            layer.triangleScale = 1
         } else {
-            layer.ngScale = 1.9
+            layer.triangleScale = 2
         }
         CATransaction.commit()
         self.isAnimating = true
@@ -263,14 +262,25 @@ class GameViewController: UIViewController {
         CATransaction.setCompletionBlock {
             self.isAnimating = false
         }
+        let layer = self.metalView.layer as! CustomCAMetalLayer
         let animation = CAKeyframeAnimation()
-        animation.keyPath = "ngScale"
-        animation.values = [(self.metalView.layer as! CustomCAMetalLayer).ngScale, -1, 1.9, -1.9, (self.metalView.layer as! CustomCAMetalLayer).ngScale]
+        animation.keyPath = "triangleScale"
+        animation.values = [
+            layer.triangleScale,
+            -1,
+            2,
+            -2,
+            layer.triangleScale
+        ]
         animation.keyTimes = [0, 0.2, 0.5, 0.8, 1]
-        animation.timingFunctions = [.init(name: .easeInEaseOut), .init(name: .easeInEaseOut), .init(name: .easeInEaseOut), .init(name: .easeInEaseOut)]
+        animation.timingFunctions = [
+            .init(name: .easeInEaseOut),
+            .init(name: .easeInEaseOut),
+            .init(name: .easeInEaseOut),
+            .init(name: .easeInEaseOut)
+        ]
         animation.duration = 8
 
-//        animation.isAdditive = true
         self.metalView.layer.add(animation, forKey: "expandScale")
 
         CATransaction.commit()
